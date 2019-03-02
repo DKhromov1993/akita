@@ -13,6 +13,7 @@
 package ru.alfabank.tests.core.drivers;
 
 import com.codeborne.selenide.WebDriverProvider;
+import io.github.bonigarcia.wdm.WebDriverManager;
 import lombok.extern.slf4j.Slf4j;
 import net.lightbody.bmp.BrowserMobProxy;
 import net.lightbody.bmp.BrowserMobProxyServer;
@@ -46,6 +47,7 @@ import java.util.List;
 import java.util.Map;
 
 import static com.codeborne.selenide.WebDriverRunner.*;
+import static org.openqa.selenium.remote.CapabilityType.BROWSER_VERSION;
 import static ru.alfabank.tests.core.helpers.PropertyLoader.loadSystemPropertyOrDefault;
 
 /**
@@ -87,14 +89,17 @@ public class CustomDriverProvider implements WebDriverProvider {
         BlackList blackList = new BlackList();
 
         if (FIREFOX.equalsIgnoreCase(expectedBrowser)) {
+            WebDriverManager.firefoxdriver().setup();
             return LOCAL.equalsIgnoreCase(remoteUrl) ? createFirefoxDriver(capabilities) : getRemoteDriver(getFirefoxDriverOptions(capabilities), remoteUrl, blackList.getBlacklistEntries());
         }
 
         if (MOBILE_DRIVER.equalsIgnoreCase(expectedBrowser)) {
+            WebDriverManager.chromedriver().setup();
             return LOCAL.equalsIgnoreCase(remoteUrl) ? new ChromeDriver(getMobileChromeOptions(capabilities)) : getRemoteDriver(getMobileChromeOptions(capabilities), remoteUrl, blackList.getBlacklistEntries());
         }
 
         if (OPERA.equalsIgnoreCase(expectedBrowser)) {
+            WebDriverManager.operadriver().setup();
             return LOCAL.equalsIgnoreCase(remoteUrl) ? createOperaDriver(capabilities) : getRemoteDriver(getOperaRemoteDriverOptions(capabilities), remoteUrl, blackList.getBlacklistEntries());
         }
 
@@ -103,18 +108,22 @@ public class CustomDriverProvider implements WebDriverProvider {
         }
 
         if (INTERNET_EXPLORER.equalsIgnoreCase(expectedBrowser)) {
+            WebDriverManager.iedriver().setup();
             return LOCAL.equalsIgnoreCase(remoteUrl) ? createIEDriver(capabilities) : getRemoteDriver(getIEDriverOptions(capabilities), remoteUrl, blackList.getBlacklistEntries());
         }
 
         if (IE.equalsIgnoreCase(expectedBrowser)) {
+            WebDriverManager.iedriver().setup();
             return LOCAL.equalsIgnoreCase(remoteUrl) ? createIEDriver(capabilities) : getRemoteDriver(getIEDriverOptions(capabilities), remoteUrl, blackList.getBlacklistEntries());
         }
 
         if (EDGE.equalsIgnoreCase(expectedBrowser)) {
+            WebDriverManager.edgedriver().setup();
             return LOCAL.equalsIgnoreCase(remoteUrl) ? createEdgeDriver(capabilities) : getRemoteDriver(getEdgeDriverOptions(capabilities), remoteUrl, blackList.getBlacklistEntries());
         }
 
-        log.info("remoteUrl=" + remoteUrl + " expectedBrowser= " + expectedBrowser + " BROWSER_VERSION=" + System.getProperty(CapabilityType.BROWSER_VERSION));
+        WebDriverManager.chromedriver().setup();
+        log.info("remoteUrl=" + remoteUrl + " expectedBrowser=" + expectedBrowser + " BROWSER_VERSION=" + System.getProperty(BROWSER_VERSION));
         return LOCAL.equalsIgnoreCase(remoteUrl) ? createChromeDriver(capabilities) : getRemoteDriver(getChromeDriverOptions(capabilities), remoteUrl, blackList.getBlacklistEntries());
     }
 
@@ -183,7 +192,7 @@ public class CustomDriverProvider implements WebDriverProvider {
     private ChromeOptions getChromeDriverOptions(DesiredCapabilities capabilities) {
         log.info("---------------Chrome Driver---------------------");
         ChromeOptions chromeOptions = !options[0].equals("") ? new ChromeOptions().addArguments(options) : new ChromeOptions();
-        chromeOptions.setCapability(CapabilityType.BROWSER_VERSION, loadSystemPropertyOrDefault(CapabilityType.BROWSER_VERSION, VERSION_LATEST));
+        chromeOptions.setCapability(BROWSER_VERSION, loadSystemPropertyOrDefault(BROWSER_VERSION, VERSION_LATEST));
         chromeOptions.setHeadless(getHeadless());
         chromeOptions.merge(capabilities);
         return chromeOptions;
@@ -197,7 +206,7 @@ public class CustomDriverProvider implements WebDriverProvider {
     private FirefoxOptions getFirefoxDriverOptions(DesiredCapabilities capabilities) {
         log.info("---------------Firefox Driver---------------------");
         FirefoxOptions firefoxOptions = !options[0].equals("") ? new FirefoxOptions().addArguments(options) : new FirefoxOptions();
-        capabilities.setVersion(loadSystemPropertyOrDefault(CapabilityType.BROWSER_VERSION, VERSION_LATEST));
+        capabilities.setVersion(loadSystemPropertyOrDefault(BROWSER_VERSION, VERSION_LATEST));
         firefoxOptions.setHeadless(getHeadless());
         firefoxOptions.merge(capabilities);
         return firefoxOptions;
@@ -211,7 +220,7 @@ public class CustomDriverProvider implements WebDriverProvider {
     private OperaOptions getOperaDriverOptions(DesiredCapabilities capabilities) {
         log.info("---------------Opera Driver---------------------");
         OperaOptions operaOptions = !options[0].equals("") ? new OperaOptions().addArguments(options) : new OperaOptions();
-        operaOptions.setCapability(CapabilityType.BROWSER_VERSION, loadSystemPropertyOrDefault(CapabilityType.BROWSER_VERSION, VERSION_LATEST));
+        operaOptions.setCapability(BROWSER_VERSION, loadSystemPropertyOrDefault(BROWSER_VERSION, VERSION_LATEST));
         operaOptions.merge(capabilities);
         return operaOptions;
     }
@@ -240,7 +249,7 @@ public class CustomDriverProvider implements WebDriverProvider {
     private InternetExplorerOptions getIEDriverOptions(DesiredCapabilities capabilities) {
         log.info("---------------IE Driver---------------------");
         InternetExplorerOptions internetExplorerOptions = !options[0].equals("") ? new InternetExplorerOptions().addCommandSwitches(options) : new InternetExplorerOptions();
-        internetExplorerOptions.setCapability(CapabilityType.BROWSER_VERSION, loadSystemPropertyOrDefault(CapabilityType.BROWSER_VERSION, VERSION_LATEST));
+        internetExplorerOptions.setCapability(BROWSER_VERSION, loadSystemPropertyOrDefault(BROWSER_VERSION, VERSION_LATEST));
         internetExplorerOptions.setCapability("ie.usePerProcessProxy", "true");
         internetExplorerOptions.setCapability("requireWindowFocus", "false");
         internetExplorerOptions.setCapability("ie.browserCommandLineSwitches", "-private");
@@ -257,7 +266,7 @@ public class CustomDriverProvider implements WebDriverProvider {
     private EdgeOptions getEdgeDriverOptions(DesiredCapabilities capabilities) {
         log.info("---------------Edge Driver---------------------");
         EdgeOptions edgeOptions = new EdgeOptions();
-        edgeOptions.setCapability(CapabilityType.BROWSER_VERSION, loadSystemPropertyOrDefault(CapabilityType.BROWSER_VERSION, VERSION_LATEST));
+        edgeOptions.setCapability(BROWSER_VERSION, loadSystemPropertyOrDefault(BROWSER_VERSION, VERSION_LATEST));
         edgeOptions.merge(capabilities);
         return edgeOptions;
     }
@@ -270,7 +279,7 @@ public class CustomDriverProvider implements WebDriverProvider {
     private SafariOptions getSafariDriverOptions(DesiredCapabilities capabilities) {
         log.info("---------------Safari Driver---------------------");
         SafariOptions safariOptions = new SafariOptions();
-        safariOptions.setCapability(CapabilityType.BROWSER_VERSION, loadSystemPropertyOrDefault(CapabilityType.BROWSER_VERSION, VERSION_LATEST));
+        safariOptions.setCapability(BROWSER_VERSION, loadSystemPropertyOrDefault(BROWSER_VERSION, VERSION_LATEST));
         safariOptions.merge(capabilities);
         return safariOptions;
     }

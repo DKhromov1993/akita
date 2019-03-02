@@ -70,6 +70,8 @@ dependencies {
     compile group: 'com.google.inject', name: 'guice', version: '4.1.0'
     compile group: 'com.galenframework', name: 'galen-java-support', version: '2.3.6'
     compile group: 'com.jayway.jsonpath', name: 'json-path', version: '2.4.0'
+    compile("io.github.bonigarcia:webdrivermanager:3.3.0")
+
 
     testCompile "org.mockito:mockito-core:2.13.0"
     testCompile "org.mockito:mockito-inline:2.13.0"
