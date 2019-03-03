@@ -12,35 +12,60 @@
  */
 package ru.alfabank.core;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import ru.alfabank.tests.core.drivers.CustomDriverProvider;
 
+import java.util.Map;
+
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.core.Is.is;
+import static org.hamcrest.Matchers.containsString;
 
-public class CustomDriverProviderTests {
+
+class CustomDriverProviderTests {
+    private CustomDriverProvider customDriverProvider;
+    private WebDriver currentDriver;
+
+    @BeforeEach
+    void setUp() {
+        customDriverProvider = new CustomDriverProvider();
+    }
 
     @Test
     void createChromeDriverTest() {
         System.setProperty("browser", "chrome");
-        CustomDriverProvider customDriverProvider = new CustomDriverProvider();
-        WebDriver currentDriver;
+        System.clearProperty("browserVersion");
         currentDriver = customDriverProvider.createDriver(new DesiredCapabilities());
         assertThat(currentDriver.getClass().getName(), is("org.openqa.selenium.chrome.ChromeDriver"));
         currentDriver.quit();
     }
 
     @Test
+    void createChromeDriverTestWithVersion() {
+        System.setProperty("browser", "chrome");
+        System.setProperty("browserVersion", "2.33");
+        currentDriver = customDriverProvider.createDriver(new DesiredCapabilities());
+        Map<String, String> chromeCap = (Map<String, String>) ((ChromeDriver) currentDriver).getCapabilities().getCapability("chrome");
+        assertThat(currentDriver.getClass().getName(), is("org.openqa.selenium.chrome.ChromeDriver"));
+        assertThat(chromeCap.get("chromedriverVersion"), containsString(System.getProperty("browserVersion")));
+    }
+
+    @Test
     @Disabled
     void createFirefoxDriverTest() {
         System.setProperty("browser", "firefox");
-        CustomDriverProvider customDriverProvider = new CustomDriverProvider();
-        WebDriver currentDriver;
         currentDriver = customDriverProvider.createDriver(new DesiredCapabilities());
         assertThat(currentDriver.getClass().getName(), is("org.openqa.selenium.firefox.FirefoxDriver"));
+    }
+
+    @AfterEach
+    void tearDown() {
         currentDriver.quit();
     }
 }
